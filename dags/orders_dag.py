@@ -1,7 +1,11 @@
 from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
+import sys
 from orders_etl import main as etl_main
+
+# Assuming orders_etl.py is in the same directory as your DAG
+sys.path.append('/mnt/c/Users/d.lardizabal/Downloads/etl_python_sql/dags')
 
 default_args = {
     'owner': 'airflow',
@@ -15,15 +19,17 @@ default_args = {
 }
 
 dag = DAG(
-    'etl_orders', 
+    'orders_delta_load', 
     default_args=default_args, 
     description='A simple DAG to ETL orders',
-    schedule_interval='@hourly',
+    schedule='@hourly',
     catchup=False
     )
 
 run_etl = PythonOperator(
     task_id='run_etl_orders',
-    python_callable=etl_main,  # Directly reference the imported function
+    python_callable=etl_main,  
     dag=dag,
 )
+
+run_etl
